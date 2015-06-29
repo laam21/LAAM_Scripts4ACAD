@@ -5,8 +5,8 @@
 #       Iterative Mapping
 #
 #       Luis Arriola
-#       Last Update: Mon 22nd June 2015
-#               v.0.1.1
+#       Last Update: Mon 29 June 2015
+#               v.0.1.2
 #
 ##########################################################
 #
@@ -40,7 +40,7 @@ else
         module load bwa tabix vcftools
         module list
         date
-        # Full path to the folder where the FilterUniqueSAMCons.py program is, e.g. "/Users/julien/bin/FilterUniqueSAMCons.py"
+        # Full path to the folder where the FilterUniqueSAMCons.py program is, e.g. "/Users/username/bin/FilterUniqueSAMCons.py"
         FILTER_PATH="/home/users/larriola/bin/"
 
         COUNTER=0
