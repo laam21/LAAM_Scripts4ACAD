@@ -2,7 +2,7 @@
 
 ##########################################################
 #
-#       Reiterative Mapping
+#       Iterative Mapping
 #
 #       Luis Arriola
 #       Last Update: Mon 22nd June 2015
@@ -54,6 +54,8 @@ else
                                 echo "Creating Output Directory: $OUTDIR"
                                 mkdir $OUTDIR
                         fi
+                        SUBDIR=Cycle_`printf "%04d" $COUNTER`
+                        mkdir $OUTDIR/$SUBDIR
                         # Indexation of the reference genomes
                         REFfileSize=$(ls -l $REFfile | awk '{ print $5}')
                         if [ -f $REFfile.amb ]; then
@@ -69,15 +71,15 @@ else
 
                         # Mapping (BWA)
                         OUTNAME=$(basename "${REFfile/\.*/}")_$(basename "${READSfile/\.fastq\.gz/}")_$COUNTER
-                        bwa aln -t 16 -l 1024 -n 0.01 -o 2 $REFfile $READSfile > $OUTDIR/$OUTNAME.sai
-                        bwa samse $REFfile $OUTDIR/$OUTNAME.sai $READSfile | samtools view -bSh -F0x4 -> $OUTDIR/$OUTNAME.bam
+                        bwa aln -t 16 -l 1024 -n 0.01 -o 2 $REFfile $READSfile > $OUTDIR/$SUBDIR/$OUTNAME.sai
+                        bwa samse $REFfile $OUTDIR/$SUBDIR/$OUTNAME.sai $READSfile | samtools view -bSh -F0x4 -> $OUTDIR/$SUBDIR/$OUTNAME.bam
                         ## Quality filter
-                        samtools view -q 30 -bh $OUTDIR/$OUTNAME.bam > $OUTDIR/$OUTNAME\_QualMap30.bam
-                        samtools sort $OUTDIR/$OUTNAME\_QualMap30.bam $OUTDIR/$OUTNAME\_QualMap30_Sort
-                        samtools view -h $OUTDIR/$OUTNAME\_QualMap30_Sort.bam | $FILTER_PATH/FilterUniqueSAMCons.py | samtools view -Sbh -> $OUTDIR/$OUTNAME\_QualMap30_Sort_Uniq.bam
+                        samtools view -q 30 -bh $OUTDIR/$SUBDIR/$OUTNAME.bam > $OUTDIR/$SUBDIR/$OUTNAME\_QualMap30.bam
+                        samtools sort $OUTDIR/$SUBDIR/$OUTNAME\_QualMap30.bam $OUTDIR/$SUBDIR/$OUTNAME\_QualMap30_Sort
+                        samtools view -h $OUTDIR/$SUBDIR/$OUTNAME\_QualMap30_Sort.bam | $FILTER_PATH/FilterUniqueSAMCons.py | samtools view -Sbh -> $OUTDIR/$SUBDIR/$OUTNAME\_QualMap30_Sort_Uniq.bam
 
                         # Call Consensus (MpileUp et al)
-                        MAPPED=$OUTDIR/$OUTNAME\_QualMap30_Sort_Uniq
+                        MAPPED=$OUTDIR/$SUBDIR/$OUTNAME\_QualMap30_Sort_Uniq
                         ## Consensus and  Fastq to Fasta
                         samtools index $MAPPED.bam
                         samtools mpileup -uf $REFfile $MAPPED.bam | bcftools view -cg - | vcfutils.pl vcf2fq | seqtk fq2fa - > $MAPPED\_consensus.fasta
