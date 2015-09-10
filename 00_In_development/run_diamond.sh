@@ -4,7 +4,7 @@
 #       DIAMOND ANALYSIS
 #
 #       Luis Arriola
-#       Last Update: 9th of June 2015
+#       Last Update: 3rd August 2015
 #
 ##########################################################
 #
@@ -17,7 +17,7 @@
 
 if [ $# == 0 ]; then
         echo    "       Usage: run_diamond.sh <input files Directory>
-                inputfiledir: FNA.GZ input file"
+                inputfiledir: Directory containingfastq.GZ input files"
 else
         echo -e "Starting Diamond analysis..."
 
