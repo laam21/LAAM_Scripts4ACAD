@@ -32,6 +32,6 @@ else
 
 		echo -e "OTU picking: Open References… \n"
 		echo -e "pick_open_reference_otus.py -i $SEQS -r /opt/shared/Qiime/1.8.0/gg_otus-13_8-release/rep_set/97_otus.fasta -aO 24 -o open97_gg13_8_"$SEQSname" "
-	#	pick_open_reference_otus.py -i $SEQS -r /opt/shared/Qiime/1.8.0/gg_otus-13_8-release/rep_set/97_otus.fasta -aO 24 -o open97_gg13_8_"$SEQSname" 
+	#	pick_open_reference_otus.py -i $SEQS -r /opt/shared/Qiime/1.8.0/gg_otus-13_8-release/rep_set/97_otus.fasta -aO 24 -o open97_gg13_8_"$SEQSname"
 	done
 fi
