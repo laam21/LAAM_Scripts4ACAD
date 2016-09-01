@@ -185,7 +185,7 @@ mv *.sam.gz SAMfiles_MALT
 unpigz SAMfiles_MALT/*
 echo "running SAM2RMA"
 for FILE in SAMfiles_MALT/*.sam; do
-        ~/software/megan/tools/sam2rma -i $FILE -o $(basename ${FILE/.sam/}).rma3 -k -s -c \
+        /home/users/larriola/software/megan/tools/sam2rma -i $FILE -o $(basename ${FILE/.sam/}).rma3 -k -s -c \
         -g2t /home/users/larriola/software/malt/data/gi_taxid_prot-2014Jan04.bin \
         -g2k /home/users/larriola/software/malt/data/gi2kegg-new.map.gz \
         -r2k /home/users/larriola/software/malt/data/ref2kegg.map.gz \
