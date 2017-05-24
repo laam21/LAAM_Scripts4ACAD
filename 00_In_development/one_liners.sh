@@ -3,7 +3,18 @@
 #Change multiple names on MoL samples
   for filename in ./*; do mv "$filename" $(basename "$filename" | awk -F "_l" '{print $1".rma3"}'); done
 
+##chec sizes of fastq files
+for i in *fastq.gz; do zcat $i | grep -c "^@M02262" ;done
+##Renaming files
+for filename in ./*; do mv "$filename" $(basename "$filename" | awk -F "_" '{print $1"."$2"."$3"_"$NF}'); done
+### Running bbmerge
+for i in *_R1.fastq.gz; do
+  bbmerge.sh in1=$i in2=${i/_R1/_R2} out=${i/_R1.fastq.gz/_merged.fastq} outu1=${i/_R1.fastq.gz/_unmerged_R1.fastq} outu2=${i/_R1.fastq.gz/_unmerged_R2.fastq}
+done
 
+
+## FASTQ to fasta
+for i in *.fastq; do cat $i | awk 'NR % 4 == 1 {print ">" $0 } NR % 4 == 2 {print $0}' > ${i/fastq/fasta}; done
 
 #Stats
 for FILE in ./*.stats; do echo "$FILE">>SUMMARY_STATS.txt; cat $FILE | awk 'NR==3' >>SUMMARY_STATS.txt;done
@@ -123,6 +134,35 @@ for FILE in *.bam; do \
   echo -ne "$(samtools depth $FILE | awk '{if ( $3>=1 ) sum+=1 } END { print (sum/2032925)*100}')%\t";\
   echo -ne "$(samtools depth $FILE | awk '{sum+=$3} END { if ( NR>0 ) {print sum/NR}}')\n";\
 done > $(basename $PWD)_SummaryStats.txt
+
+###Summary_stats on Iterative
+for FILE in *.bam; do Col1=$(echo "$FILE"); \ #File name
+  Col2=$(echo "$FILE" | cut -d"." -f1 | cut -d"_" -f3);\ #Divergence "MutatedNone"
+  Col3=$(echo "$FILE" | cut -d"." -f1 | cut -d"_" -f1);\ #Mapper
+  Col4=$(head $FILE.stats | awk 'NR==1' | cut -d"+" -f1);\ #TotalReads
+  Col5=$(head $FILE.stats | awk 'NR==3' | cut -d"+" -f1);\ #MappedReads
+  Col6=$(head $FILE.stats | awk 'NR==3' | cut -d"(" -f2 | cut -d":" -f1);\ #%MappedReads
+  Col7=$(samtools depth $FILE | awk '{if ( $3>=1 ) sum+=1 } END { print  (sum/2032925)*100}');\ #PercentageCovered
+  Col8=$(samtools depth $FILE | awk '{sum+=$3} END { if ( NR>0 ) {print sum/NR}}');\ #AvergageDepthofCoverage
+  echo "$Col1 $Col2 $Col3 $Col4 $Col5 $Col6 $Col7 $Col8" >Summaries.txt;\
+done
+
+echo -ne "FileName\tDivergence\tMapper\tTotalReads\tMappedReads\tPercentMappedreads\t"
+for FILE in *.bam; do Col1=$(echo "$FILE"); \
+  Col2=$(echo "$FILE" | cut -d"." -f1 | cut -d"_" -f3);\
+  Col3=$(echo "$FILE" | cut -d"." -f1 | cut -d"_" -f1);\
+  Col4=$(head $FILE.stats | awk 'NR==1' | cut -d"+" -f1);\
+  Col5=$(head $FILE.stats | awk 'NR==3' | cut -d"+" -f1);\
+  Col6=$(head $FILE.stats | awk 'NR==3' | cut -d"(" -f2 | cut -d":" -f1);\
+  Col7=$(samtools depth $FILE | awk '{if ( $3>=1 ) sum+=1 } END { print  (sum/2032925)*100}');\
+  Col8=$(samtools depth $FILE | awk '{sum+=$3} END { if ( NR>0 ) {print sum/NR}}');\
+  echo "$Col1 $Col2 $Col3 $Col4 $Col5 $Col6 $Col7 $Col8" >>Summaries.txt;\
+done
+
+
+
+
+
 
 #Find from which organisms is the contamination comming from?
 for FILE in *.bam; do \
