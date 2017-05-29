@@ -25,6 +25,16 @@ for FILE in ./*.stats; do echo "$FILE"; head "$FILE" | awk 'NR==3' | cut -d"(" -
 #MeganServer
 ./start.sh --name ACAD_DC --max-memory 8G
 
+#To get the unmapped reads from a bam file use :
+samtools view -f 4 file.bam > unmapped.sam, the output will be in sam
+
+#to get the output in bam use :
+samtools view -b -f 4 file.bam > unmapped.bam
+
+#To get only the mapped reads use the parameter 'F', which works like -v of grep and skips the alignments for a specific flag.
+samtools view -b -F 4 file.bam > mapped.bam
+
+
 
 #To get the genome size from a BAM file
 samtools view -H SmutansUA159_SIM150.1_1snp_bwaaln.sort.bam | grep -P '^@SQ' | cut -f 3 -d ':' |  awk '{sum+=$1} END {print sum}'
@@ -158,6 +168,37 @@ for FILE in *.bam; do Col1=$(echo "$FILE"); \
   Col8=$(samtools depth $FILE | awk '{sum+=$3} END { if ( NR>0 ) {print sum/NR}}');\
   echo "$Col1 $Col2 $Col3 $Col4 $Col5 $Col6 $Col7 $Col8" >>Summaries.txt;\
 done
+
+#Summary statistics Iterative level0
+echo -ne "Method\tDivergence\tType\tDeamination\tMapper\tTotalReads\tMappedReads\t%MappedReads\tCoverage\tDepthCov\n">>Summaries_itera0.txt;
+for FILE in *.bam; do Col1=$(echo "$FILE" | cut -d"_" -f5); #Method
+  Col2=$(echo "$FILE" | cut -d"_" -f2); #Divergence
+  Col3=$(echo "$FILE" | cut -d"_" -f3); #Type
+  Col4=$(echo "$FILE" | cut -d"_" -f4); #Deamination
+  Col5=$(echo "$FILE" | cut -d"_" -f1); #Mapper
+  Col6=$(head $FILE.stats | awk 'NR==1' | cut -d"+" -f1); #TotalReads
+  Col7=$(head $FILE.stats | awk 'NR==3' | cut -d"+" -f1); #MappedReads
+  Col8=$(head $FILE.stats | awk 'NR==3' | cut -d"(" -f2 | cut -d":" -f1); #PercentMappedReads
+  Col9=$(samtools depth $FILE | awk '{if ( $3>=1 ) sum+=1 } END { print  (sum)}'); #Coverage
+  Col10=$(samtools depth $FILE | awk '{sum+=$3} END { if ( NR>0 ) {print (sum/NR)} else {print 0}}');#DepthCov
+  echo -e "$Col1\t$Col2\t$Col3\t$Col4\t$Col5\t$Col6\t$Col7\t$Col8\t$Col9\t$Col10" >>Summaries_itera0.txt;
+done
+
+echo -ne "Method\tDivergence\tType\tDeamination\tMapper\tTotalReads\tMappedReads\t%MappedReads\tCoverage\tDepthCov\n">>Summaries_itera0.txt;
+for FILE in *.bam; do Col1=$(echo "$FILE" | cut -d"_" -f5); \
+  Col2=$(echo "$FILE" | cut -d"_" -f2); \
+  Col3=$(echo "$FILE" | cut -d"_" -f3); \
+  Col4=$(echo "$FILE" | cut -d"_" -f4); \
+  Col5=$(echo "$FILE" | cut -d"_" -f1); \
+  Col6=$(head $FILE.stats | awk 'NR==1' | cut -d"+" -f1); \
+  Col7=$(head $FILE.stats | awk 'NR==3' | cut -d"+" -f1); \
+  Col8=$(head $FILE.stats | awk 'NR==3' | cut -d"(" -f2 | cut -d":" -f1); \
+  Col9=$(samtools depth $FILE | awk '{if ( $3>=1 ) sum+=1 } END { print  (sum)}'); \
+  Col10=$(samtools depth $FILE | awk '{sum+=$3} END { if ( NR>0 ) {print (sum/NR)} else {print 0}}'); \
+  echo -e "$Col1\t$Col2\t$Col3\t$Col4\t$Col5\t$Col6\t$Col7\t$Col8\t$Col9\t$Col10" >>Summaries_itera0.txt; \
+done
+
+
 
 
 
