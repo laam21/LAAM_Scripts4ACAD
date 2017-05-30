@@ -1,3 +1,5 @@
+#!/bin/bash
+
 #### METHODS in Palaeomicrobiology
 #### Luis Arriola
 
@@ -14,7 +16,6 @@
 #Script "mutate_reads.sh"
 #@acad.ersa.edu.au:/localscratch/larriola/METAGENOMICS/SMUTANS_MAPPING_TEST
 
-#!/bin/bash
 for FQ in /localscratch/larriola/METAGENOMICS/SMUTANS_MAPPING_TEST/SIM_READS/*.1.fastq
 do
  for COUNT in 1 2 4 8 16 32
