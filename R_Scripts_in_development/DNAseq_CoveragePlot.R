@@ -53,11 +53,12 @@ ggplot(data = df, aes(x = x, y = mean)) +
   ylab("coverage") +
   scale_x_continuous(expand = c(0,0)) +
   scale_y_continuous(limits = c(0, maxy)) +
-  ggtitle("Coverage Across Reference") #+geom_smooth()
+  ggtitle("Coverage Across Reference") +geom_smooth(method = loess, colour="Red")
 
 dev.off()
 
-
+ggplot(data=all.data, aes(x = V2), stat_bin(binwidth = 1000)) + geom_histogram() 
+head(all.data)
 
 #ploting with ggplot 2: X vs mean, lines
 ggplot(data = df, aes(x = x, y = mean)) +
