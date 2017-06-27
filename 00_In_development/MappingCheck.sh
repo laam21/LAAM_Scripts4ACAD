@@ -11,24 +11,25 @@
 #
 # This script checks how many reads were mapped within the correct slidding window
 
-join -1 <colfile1> -2 <col file2> file1 file2 | awk -v Chr=${Arrayline[0]} -v Start=$(( ${Arrayline[1]}-1 )) -v End=${Arrayline[2]} '
+#Produce BEDfiles from BAMs
+#bedtools bamtobed -i SIM_150.DAMAGED.0_bwapssm.sort.bam | head
+#bedtools bamtobed -i SIM_150.DAMAGED.0_bwapssm.sort.QM0.bam | join -1 4 -2 4 /Volumes/ACADretina1_Backup/PHD/CHAPTER2_DATA/SMUTANS_MAPPING_TEST/1_Input_Datasets/SMUT_GENOME/0_AllDatasets/Ground_Truth/SIM_150.readStartIndexes_COORD_HEADER.bed /dev/stdin
+#Join file with original coordinates  with the mappedReads Bedfiles  and calculate
+join -1 4 -2 4 file1 file2 |awk '
 BEGIN{
-SelfFound="N"
+  print "HEADER\tChrOri\tStOri\tEndOri\tChrMap\tStMap\tEndMap\tStrand\tMAP";
+  TrueCount=0;
+  FalseCount=0;
 }
 {
-if(Chr == $1 && Start == $2 && End == $3){
-SelfFound = "Y";
-next
-}else if(Chr == $1 && ((Start <= $2 && End >= $2) || (Start <= $3 && End >= $3)) ){
-SelfFound = "O"
-}else if(Chr == $1 &&  $2 <= Start  && $3 >= End ){
-SelfFound = "OO"
-}else if(Chr == $1 &&  $2 <= End  && $3 >= Start ){
-SelfFound = "OI"
+  if((($3-1) <= $6) && (($4-1)>=$7)){
+    TrueCount++;
+    print $0"\tTRUE\t"$3-1-$6"\t"$4-1-$7;
+  }else{
+    FalseCount++;
+    print $0"\tFALSE\t"$3-1-$6"\t"$4-1-$7;
+  }
 }
-}END{
-if(!NR){
-SelfFound= "E"
-};
-print SelfFound
-}' )
+END{
+  print TrueCount"\t"FalseCount
+} '
