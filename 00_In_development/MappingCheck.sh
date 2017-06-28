@@ -26,6 +26,7 @@ for BAM in *.bam ; do
     samtools view -q $MQUAL -bh -F0x4 $BAM \
     | bedtools bamtobed -i /dev/stdin \
     | sort -k4,4 \
+    | sed -E s/\\/1// \
     | join -1 4 -2 4 $REF /dev/stdin \
     | awk -v MQ=$MQUAL -v FILE=$BAM '
         BEGIN{
@@ -43,4 +44,4 @@ for BAM in *.bam ; do
           print FILE"\t"MQ"\t"TrueCount"\t"FalseCount"\t"TrueCount+FalseCount"\t"
         } ';
     done
-done
+done > MappingCheck_OutputTable.txt
