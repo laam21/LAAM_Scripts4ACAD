@@ -29,7 +29,7 @@ else
 	echo "Reference File:	$DIR"
 	OUTfile=$2
 	echo "Output File:		$OUTfile"
-	
+
 	if [ -d $DIR ]; then
 		for FILE in $DIR/*.fa; do
 			TEMP=`basename $FILE | cut -d'_' -f1`_
