@@ -3,6 +3,8 @@
 #Change multiple names on MoL samples
   for filename in ./*; do mv "$filename" $(basename "$filename" | awk -F "_l" '{print $1".rma3"}'); done
 
+#rename
+for i in *.fasta; do mv "$i" ${i::-31}_merged.fasta; done
 ##chec sizes of fastq files
 for i in *fastq.gz; do zcat $i | grep -c "^@M02262" ;done
 ##Renaming files
@@ -24,8 +26,8 @@ for FILE in ./*.stats; do echo "$FILE"; head "$FILE" | awk 'NR==3' | cut -d"(" -
 
 #MeganServer
 ./start.sh --name ACAD_DC --max-memory 8G
-
 #To get the unmapped reads from a bam file use :
+
 samtools view -f 4 file.bam > unmapped.sam, the output will be in sam
 
 #to get the output in bam use :
@@ -273,3 +275,20 @@ SOAPdenovo-63mer all -s SOAPdenovo_SmNone.config -R -p 16 -o SOAPdenovo_SmNone1 
 
 ##[LIB]
 ##f=/localscratch/larriola/METAGENOMICS/SMUTANS_MAPPING_TEST/1_Input_Datasets/SMUT_GENOME/WHOLE_GENOME/SmutansUA159_MutatedHigh1_SWRECKED_Deam5.fasta
+
+
+## Filter by Quality
+for BAM in *.sort.bam ; do samtools view -q 25 -bh -F0x4 $BAM > ${BAM/\.bam/}.MQ25.bam & done
+
+
+#QIIME
+##Load Modules
+
+module load qiime/1.9.1-Python-2.7.11 BLAST/2.2.26-Linux_x86_64 Python/2.7.11-foss-2016uofa HDF5/1.8.16-foss-2016uofa
+-> core dumped fixed by adding HDF5 and python modules
+Test on Seqs
+
+
+#Works on closed and open
+module load QIIME/1.9.1 BLAST/2.2.26-Linux_x86_64
+#test on 3_outputdata
