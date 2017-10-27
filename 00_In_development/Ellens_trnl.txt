@@ -1,0 +1,31 @@
+#!/bin/bash -l
+####  Analysis of Molecular Markers against NCBI refseq database
+##    Create datasets from NCBI and prepare data for QIIME
+#### Luis Arriola
+
+# I.-   Downloaded 251,274 TrnL tRNA sequences from NCBI
+  RefSeqsTrnL/RefSeq_TrnL_170912.fasta
+  https://www.ncbi.nlm.nih.gov/nuccore/?term=trnL
+
+# II.-  Downloaded most updated taxonomy data from NCBI
+
+# III.- Created accession-to-taxonomy file based on the TrnL sequences
+  RefSeqsTrnL/RefSeq_TrnL_170912_accession_taxonomy.txt
+
+# IV.1-   Created seqs.fna file from Ellen's files using fastatofna.pl
+  SampleData/seqs.fna
+
+# IV.2-   OTU_picking on seqs.fna
+  pick_otus.py -i SampleData/seqs.fna
+  pick_rep_set.py -i uclust_picked_otus/seqs_otus.txt -f SampleData/seqs.fna -o rep_set.fna
+  assign_taxonomy.py -i rep_set.fna -t RefSeqsTrnL/RefSeq_TrnL_170912_accession_taxonomy.txt -m blast -r RefSeqsTrnL/RefSeq_TrnL_170912.fasta
+  make_otu_table.py -i uclust_picked_otus/seqs_otus.txt -t blast_assigned_taxonomy/rep_set_tax_assignments.txt -o Ellen_TrnL_170912_otu_table.biom
+  biom convert -i Ellen_TrnL_170912_otu_table.biom -o otu_table_tabseparated.txt --to-tsv --header-key taxonomy --output-metadata-id "ConsensusLineage"
+  summarize_taxa.py -i Ellen_TrnL_170912_otu_table.biom -o taxonomy_summaries
+
+
+# V.1-  Ran assign_taxonomy.py for the seqs.fna file with TrnLBLASTdb and accession-to-taxonomy
+  blast_assigned_taxonomy
+
+#* V.2.1- Created a BLAST formated db from the TrnL fasta file
+#* V.2.2- Ran assign_taxonomy.py for the seqs.fna file with TrnL BLASTdb file and accession-to-taxonomy

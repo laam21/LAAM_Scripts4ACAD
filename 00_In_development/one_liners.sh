@@ -292,3 +292,191 @@ Test on Seqs
 #Works on closed and open
 module load QIIME/1.9.1 BLAST/2.2.26-Linux_x86_64
 #test on 3_outputdata
+
+### Filter BAM using bedfile with coordinates
+module load BEDTools/2.26.0-foss-2016b
+for FILE in *.MQ30; do
+bedtools intersect -a $FILE -b SmUA159_RNAmaskChr.bed -v >$FILE.mask ;
+done
+
+#2
+for BAM in *sort.bam; do
+  samtools view -q30 -bh -F0x4 $BAM | bedtools intersect -a /dev/stdin -b SmUA159_RNAmaskChr.bed -v > $BAM.MQ30.mask &
+  wait
+done
+
+### Test
+samtools view -bh MUTATEDNONE0_90C10E_DEAM5_ARcollapsed_MAPPING_bwamem.sort.bam.MQ30 | bedtools bamtobed -i /dev/stdin | awk '{print $2":"$3":"$4}' | awk -F ":" 'BEGIN{TrueCount=0;FalseCount=0;}{if(($1 <= $10) && ($2 >= $11)){TrueCount++;}else{FalseCount++;}}END{print TrueCount"\t"FalseCount"\t"TrueCount+FalseCount}' | head
+
+
+
+###
+#Bowtie2
+#Bowtie2
+echo -e "bowtie2 \n"
+gzip -dc $FQZ \
+| bowtie2 -p32 -f -x $REF_Bowtie -U /dev/stdin -S $(basename "${FQZ/\.fa}")a.sam
+( samtools view -uSh $(basename "${FQZ/\.fa/}")a.sam \
+| samtools sort - -o $(basename "${FQZ/\.fa/}")_REFGUIDED_bowtie2.sort.bam) &
+
+#Bowtie2-aDNA
+echo -e "bowtie2aDNA \n"
+gzip -dc $FQZ \
+| bowtie2 -p32 -f --mp 1,1 --ignore-quals --score-min L,0,-0.03 -x $REF_Bowtie -U /dev/stdin -S $(basename "${FQZ/\.fa/}")b.sam
+( samtools view -uSh $(basename "${FQZ/\.fa/}")b.sam \
+| samtools sort - -o $(basename "${FQZ/\.fa/}")_REFGUIDED_bowtie2aDNA.sort.bam) &
+
+#Bowtie2-Vsens
+echo -e "bowtie2VSens \n"
+gzip -dc $FQZ \
+| bowtie2 -p32 -f --very-sensitive -x $REF_Bowtie -U /dev/stdin -S $(basename "${FQZ/\.fa/}")c.sam
+( samtools view -uSh $(basename "${FQZ/\.fa/}")c.sam \
+| samtools sort - -o $(basename "${FQZ/\.fa/}")_REFGUIDED_bowtie2Vsens.sort.bam) &
+
+
+
+#CHANGE NAME to fastqfiles to avoid repeated reads
+for FILE in *.fq.gz; do
+ zcat $FILE | awk '{if ($1 ~ /^@M_*:*/ ) {print $1"_"NR-1} else{ print}}' > ${FILE/\.fq\.gz/}_FNR.fastq
+done
+
+RunName=170517_IMS_MAb_16SAfricanPygmies_Demu_ACAD
+
+bbmerge.sh in1=not_demultiplexed_NoIndex_R1.fastq.gz in2=not_demultiplexed_NoIndex_R3.fastq.gz out="$RunName"_merged.fastq.gz outu1="$RunName"_unmerged1.fastq.gz outu2=SequenceO"$RunName"_unmerged2.fastq.gz
+
+
+
+### Calculate number of reads in fq files
+for FILE in DATASET*/2_NOADAPTER_READS*/COLLAPSED/*ARcollapsed.fq.gz; do echo -e "$FILE\t" `zcat $FILE | seqtk seq -A - | grep -c "^>"`; done
+#endogenous
+for FILE in DATASET*/2_NOADAPTER_READS*/COLLAPSED/*ARcollapsed.fq.gz; do echo -e "$FILE\t" `zcat $FILE | grep -c "GCA_000007465.2"`; done
+
+
+#### ITERATIVE MAPPING ASSEMBLY CHECK
+#1) Get the MAF file and transform it to SAM file
+module load SAMtools/1.3.1-foss-2016b BEDTools/2.26.0-foss-2016b
+
+for DIR in *FNR_ITERATIVEASSEMBLY; do
+  for ITERATION in $DIR/iteration*; do
+    echo -e "$DIR $ITERATION "
+    MAF=$ITERATION/testpool-Streptococcus_mutans_UA159_assembly/testpool-Streptococcus_mutans_UA159_d_results/testpool-Streptococcus_mutans_UA159_out.maf
+    miraconvert $MAF ${DIR}_ITERMAP_mbim.sam
+    wait
+    samtools view -uSh ${DIR}_ITERMAP_mbim.sam | samtools sort - -o ${DIR}_ITERMAP_mbim.sort.bam
+    wait
+  done
+done
+
+#For the different mismatch values
+module load SAMtools/1.3.1-foss-2016b BEDTools/2.26.0-foss-2016b
+
+for DIR in *FNR_ITERATIVEASSEMBLY_*; do
+  for ITERATION in $DIR/iteration*; do
+    echo -e "$DIR $ITERATION "
+    MAF=$ITERATION/testpool-Streptococcus_mutans_UA159_assembly/testpool-Streptococcus_mutans_UA159_d_results/testpool-Streptococcus_mutans_UA159_out.maf
+    miraconvert $MAF ${DIR}_ITERMAP_mbim.sam
+    wait
+    samtools view -uSh ${DIR}_ITERMAP_mbim.sam | samtools sort - -o ${DIR}_ITERMAP_mbim.sort.bam
+    wait
+  done
+done
+
+
+#manual test
+java -jar ${EBROOTPICARD}/picard.jar MarkDuplicates I=MUTATEDNONE0_90C10E_DEAM5_ARcollapsed_MAPPING_mira.sort.bam O=MUTATEDNONE0_90C10E_DEAM5_ARcollapsed_MAPPING_mira.sort.RMDUP.bam AS=TRUE M=/dev/null REMOVE_DUPLICATES=TRUE VALIDATION_STRINGENCY=LENIENT
+samtools index MUTATEDNONE0_90C10E_DEAM5_ARcollapsed_MAPPING_mira.sort.RMDUP.bam
+samtools mpileup -uf $REF MUTATEDNONE0_90C10E_DEAM5_ARcollapsed_MAPPING_mira.sort.RMDUP.bam | bcftools call -c --ploidy 1 | vcfutils.pl vcf2fq | seqtk seq -A - > MUTATEDNONE0_90C10E_DEAM5_ARcollapsed_MAPPING_mira.sort.RMDUP_consensus.fasta
+cat MUTATEDNONE0_90C10E_DEAM5_ARcollapsed_MAPPING_mira.sort.RMDUP_consensus.fasta | seqtk cutN -n 5 - > MUTATEDNONE0_90C10E_DEAM5_ARcollapsed_MAPPING_mira.sort.RMDUP_consensus_contigs.fa
+
+
+#) Run summary ANALYSIS
+
+
+#Consensus scaffolds for Iterative Mapping
+#module load seqtk
+for DIR in *FNR_ITERATIVEASSEMBLY; do
+  FASTA=$DIR/iteration*/*_noIUPAC.fasta
+  if [ -e $FASTA ]; then
+    cp $DIR/iteration*/*_noIUPAC.fasta ../ITERATIVE_COLLAPSED_FINAL_SCAFFOLDS/${DIR}_consensus.fa
+  fi
+done
+
+
+
+# Obtain consensus scaffold and contigs from MIRA
+for FQZ in *_FNR.fastq; do
+  miraconvert -f maf ${FQZ/\.fastq/}_MappingAssembly_assembly/${FQZ/\.fastq/}_MappingAssembly_d_results/${FQZ/\.fastq/}_MappingAssembly_out.maf ${FQZ/FNR\.fastq/}MAPPING_mira_consensus.fasta
+  wait
+  cat ${FQZ/FNR\.fastq/}MAPPING_mira_consensus.fasta | seqtk cutN -n 5 - > ${FQZ/FNR\.fastq/}MAPPING_mira_consensus_contigs.fa
+  wait
+done
+
+for FQZ in *_FNR.fastq; do
+  cp ${FQZ/\.fastq/}_MappingAssembly_assembly/${FQZ/\.fastq/}_MappingAssembly_d_results/${FQZ/\.fastq/}_MappingAssembly_out_Streptococcus_mutans_UA159.unpadded.fasta ${FQZ/FNR\.fastq/}MAPPING_mira_consensus.fasta
+  wait
+  cat ${FQZ/FNR\.fastq/}MAPPING_mira_consensus.fasta | seqtk cutN -n 5 - > ${FQZ/FNR\.fastq/}MAPPING_mira_consensus_contigs.fa
+  wait
+done
+
+
+####COnsensus without removing duplications
+for BAM in *mira.sort.bam.MQ30 ; do
+  samtools mpileup -uf $REF $BAM | bcftools call -c --ploidy 1 | vcfutils.pl vcf2fq | seqtk seq -A - > ${BAM/\.bam/}_consensus.fasta
+  cat ${BAM/\.bam/}_consensus.fasta | seqtk cutN -n 5 - > ${BAM/\.bam/}_consensus_contigs.fa
+done
+
+
+
+# Collapsed reads mapping with mira test 2
+for FQZ in *_FNR.fastq; do
+  ## Initial mapping assembly using MIRA 4
+  # Create manifest.conf files
+  echo -e "\n#Manifest file for basic mapping assembly with illumina data using MIRA 4\n\nproject = ${FQZ/\.fastq/}_MappingAssembly\n\njob=genome,mapping,accurate\n\nparameters = -GE:not=24 -NW:mrnl=0 -NW:cdrn=no -AS:nop=2 \n\nreadgroup\nis_reference\ndata = /localscratch/larriola/METAGENOMICS/SMUTANS_MAPPING_TEST_2017/1_Input_Datasets/REFERENCE/SmutansUA159.fna\nstrain = Streptococcus_mutans_UA159\n\nreadgroup = reads\ndata = $FQZ\ntechnology = solexa\nstrain = testpool\n" > ${FQZ/\.fastq/}_manifest.conf
+
+  mira ${FQZ/\.fastq/}_manifest.conf
+done
+
+
+
+#### Mbim denovo > BAM and summary files > Consensus scaffold and contigs
+module load SAMtools/1.3.1-foss-2016b BEDTools/2.26.0-foss-2016b seqtk
+
+for DIR in *FNR_ITERMAP_mbimDenovo*; do
+  echo $DIR
+  for ITERATION in $DIR/iteration*; do
+    echo $ITERATION
+    if [ -e $ITERATION/testpool_Streptococcus_mutans_UA159-it*_noIUPAC.fasta ]; then
+      #obtain fasta Consensus
+      cp $ITERATION/testpool_Streptococcus_mutans_UA159-it*_noIUPAC.fasta ./${DIR/_FNR/}_consensus.fasta
+      #obtain fasta consensus contigs
+      cat $ITERATION/testpool_Streptococcus_mutans_UA159-it*_noIUPAC.fasta | seqtk cutN -n 5 - > ${DIR/_FNR/}_consensus_contigs.fa
+      #obtain sam from final maf
+      MAF=$ITERATION/testpool-Streptococcus_mutans_UA159_assembly/testpool-Streptococcus_mutans_UA159_d_results/testpool-Streptococcus_mutans_UA159_out.maf
+      miraconvert $MAF ${DIR/_FNR}.sam
+      wait
+    fi
+  done
+done
+
+for SAM in *.sam; do samtools view -uSh $SAM | samtools sort - -o ${SAM/\.sam/}.sort.bam & wait; done
+for BAM in *.sort.bam ; do samtools index $BAM & wait; done
+for BAM in *.sort.bam ; do samtools flagstat $BAM > ${BAM}.stats & wait; done
+for BAM in *.sort.bam; do samtools view -q30 -bh -F0x4 $BAM > $BAM.MQ30 & wait; done
+for BAM in *.sort.bam.MQ30; do samtools flagstat $BAM > $BAM.stats & wait; done
+#BED=/localscratch/larriola/METAGENOMICS/SMUTANS_MAPPING_TEST_2017/1_Input_Datasets/MisincorporationData/SmUA159_RNAmaskChr.bed
+#for BAM in *sort.bam; do samtools view -q30 -bh -F0x4 $BAM | bedtools intersect -a /dev/stdin -b $BED -v > $BAM.MQ30.mask & wait; done
+
+
+
+### Masked Mapped
+for FILE in *.bam; do
+  Col1=$(echo $FILE | cut -d"_" -f1);
+  Col2=$(echo $FILE | cut -d"_" -f2);
+  Col3=$(echo $FILE | cut -d"_" -f3);
+  Col4=$(echo $FILE | cut -d"_" -f4);
+  Col5=$(echo $FILE | cut -d"_" -f5);
+  Col6=$(echo $FILE | cut -d"_" -f6 | cut -d"." -f1);
+  Col8=$( samtools view $FILE.MQ30.mask | grep -c "GCA_000007465.2:Chromosome:1:2032925");
+  Col7=$( cat $FILE.MQ30.mask.stats | grep "mapped (" | cut -d"+" -f1 );
+  echo -e "$Col1\t$Col2\t$Col3\t$Col4\t$Col5\t$Col6\t$Col7\t$Col8" >Masked_summary.txt;
+done

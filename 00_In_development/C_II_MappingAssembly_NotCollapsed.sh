@@ -99,3 +99,4 @@ for BAM in *.sort.bam ; do samtools index $BAM & done
 for BAM in *.sort.bam ; do samtools flagstat $BAM > ${BAM}.stats & done
 #for BAM in *.sort.bam; do samtools view -q30 -bh -F0x4 $BAM | samtools flagstat - > $BAM.MQ30stats & done
 wait
+#for BAM in *.sort.bam; do samtools view -q30 -bh -F0x4 $BAM > $BAM.MQ30 & done

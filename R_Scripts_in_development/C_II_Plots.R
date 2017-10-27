@@ -1,3 +1,4 @@
+##### Reference mapping assembly Analysis Summaries.txt File
 setwd("/Volumes/ACADretina1_Backup/PHD/CHAPTER2_DATA/1708014_SMUTANS_MAPPING_TEST/2_Analyses/0_MAPPING_ASSEMBLY/")
 getwd()
 list.files()
@@ -57,6 +58,16 @@ ggplot(aes(x=Divergence,y=((MQ30Endogenous/MQ30MappedReads)*100)),data=df)+
 ggsave('C_II_MAP_Percentage_Endogenous_MQ30_TotalMapped.png')
 
 
+ggplot(aes(x=Divergence,y=MQ30Endogenous),data=df)+
+  geom_point(aes(color=Tool, shape=Contamination, alpha=Deamination), position = position_dodge(width = .5), size=2.5) +
+  facet_grid(Tool~TypeReads)+
+  ggtitle('Total Endogenous reads Mapped with MQ>=30') +
+  theme(axis.text.x = element_text(angle=90, hjust = 0), legend.position = "bottom")
+
+ggsave('C_II_MAP_Total_Endogenous_MQ30.png')
+
+
+
 ggplot(aes(x=Divergence,y=(((MQ30MappedReads-MQ30Endogenous)/MQ30MappedReads)*100)),data=df)+
   geom_point(aes(color=Tool, shape=Contamination, alpha=Deamination), position = position_dodge(width = .5), size=2.5) +
   facet_grid(Tool~TypeReads)+
@@ -73,6 +84,13 @@ ggplot(aes(x=Divergence,y=((MQ30MappedReads/MappedReads)*100)),data=df)+
 
 ggsave('C_II_MAP_Percentage_Reads_MQ30_Mapped_TotalMapped.png')
 
+ggplot(aes(x=Divergence,y=MQ30MappedReads),data=df)+
+  geom_point(aes(color=Tool, shape=Contamination, alpha=Deamination), position = position_dodge(width = .5), size=2.5) +
+  facet_grid(Tool~TypeReads)+
+  ggtitle('Number of Reads Mapped at MQ30') +
+  theme(axis.text.x = element_text(angle=90, hjust = 0), legend.position = "bottom")
+
+ggsave('C_II_MAP_Total_Reads_MQ30_Mapped.png')
 
 ###################CORRECT MAPPING
 df2 <- read.csv("Summaries_CorrectMapping.txt", sep = '\t')
@@ -96,6 +114,16 @@ ggplot(aes(x=Divergence,y=((MQ30EndoWithinStrict/MQ30EndoSumStrict)*100)),data=d
 ggsave('C_II_MAP_Percentage_MappedWithinCoords_MQ30_TotalEndogenous_Strict.png')
 
 
+ggplot(aes(x=Divergence,y=MQ30EndoWithinStrict),data=df2)+
+  geom_point(aes(color=Tool, shape=Contamination, alpha=Deamination), position = position_dodge(width = .5), size=2.5) +
+  facet_grid(Tool~TypeReads)+
+  ggtitle('Total Endogenous reads Mapped within the original coordinates (strict) at MQ30') +
+  theme(axis.text.x = element_text(angle=90, hjust = 0), legend.position = "bottom")
+
+ggsave('C_II_MAP_Total_MappedWithinCoords_MQ30_Strict.png')
+
+
+
 ggplot(aes(x=Divergence,y=((MQ30EndoOutsideStrict/MQ30Endogenous)*100)),data=df2)+
   geom_point(aes(color=Tool, shape=Contamination, alpha=Deamination), position = position_dodge(width = .5), size=2.5) +
   facet_grid(Tool~TypeReads)+
@@ -103,6 +131,14 @@ ggplot(aes(x=Divergence,y=((MQ30EndoOutsideStrict/MQ30Endogenous)*100)),data=df2
   theme(axis.text.x = element_text(angle=90, hjust = 0), legend.position = "bottom")
 
 ggsave('C_II_MAP_Percentage_MappedOutsideCoords_MQ30_TotalEndogenous_Strict.png')
+
+ggplot(aes(x=Divergence,y=MQ30EndoOutsideStrict),data=df2)+
+  geom_point(aes(color=Tool, shape=Contamination, alpha=Deamination), position = position_dodge(width = .5), size=2.5) +
+  facet_grid(Tool~TypeReads)+
+  ggtitle('Total Endogenous reads Mapped Outside of the original coordinates at MQ30') +
+  theme(axis.text.x = element_text(angle=90, hjust = 0), legend.position = "bottom")
+
+ggsave('C_II_MAP_Total_MappedOutsideCoords_MQ30_Strict.png')
 
 
 ggplot(aes(x=Divergence,y=((MQ30EndoWithin50/MQ30Endogenous)*100)),data=df2)+
@@ -140,3 +176,29 @@ ggplot(aes(x=Divergence,y=(((TotalRNA-EndoRNA)/MQ30MappedReads)*100)),data=df2)+
   facet_grid(Tool~TypeReads)+
   ggtitle('Percentage Non Endogenous Mapped at MQ30 excluding Reads Mapped in RNA regions') +
   theme(axis.text.x = element_text(angle=90, hjust = 0), legend.position = "bottom")
+
+ggplot(aes(x=Divergence,y=(((TotalRNA-EndoRNA)/MQ30MappedReads)*100)),data=df2)+
+  geom_point(aes(color=Tool, shape=Contamination, alpha=Deamination), position = position_dodge(width = .5), size=2.5) +
+  facet_grid(Tool~TypeReads)+
+  ggtitle('Percentage Non Endogenous Mapped within RNA regions from Total Mapped at MQ30') +
+  theme(axis.text.x = element_text(angle=90, hjust = 0), legend.position = "bottom")
+
+ggsave('C_II_MAP_Percentage_NonEndo_Mapped_inRNACoords_Totalmapped_MQ30.png')
+
+
+ggplot(aes(x=Divergence,y=(((MQ30MappedReads-MQ30Endogenous)-(TotalRNA-EndoRNA))/MQ30MappedReads)),data=df2)+
+  geom_point(aes(color=Tool, shape=Contamination, alpha=Deamination), position = position_dodge(width = .5), size=2.5) +
+  facet_grid(Tool~TypeReads)+
+  ggtitle('Percentage Non Endogenous Mapped outside RNA regions from Total Mapped at MQ30') +
+  theme(axis.text.x = element_text(angle=90, hjust = 0), legend.position = "bottom")
+
+ggsave('C_II_MAP_Percentage_NonEndo_Mapped_outRNACoords_Totalmapped_MQ30.png')
+
+
+ggplot(aes(x=Divergence,y=(((MQ30MappedReads-MQ30Endogenous)-(TotalRNA-EndoRNA))/MQ30MappedReads)),data=df2)+
+  geom_point(aes(color=Tool, shape=Contamination, alpha=Deamination), position = position_dodge(width = .5), size=2.5) +
+  facet_grid(Tool~TypeReads)+
+  ggtitle('Percentage Non Endogenous Mapped outside RNA regions from Total Mapped at MQ30') +
+  theme(axis.text.x = element_text(angle=90, hjust = 0), legend.position = "bottom")
+
+ggsave('C_II_MAP_Percentage_NonEndo_Mapped_outRNACoords_Totalmapped_MQ30.png')
