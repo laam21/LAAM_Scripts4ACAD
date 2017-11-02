@@ -29,5 +29,5 @@ done
   for BAM in *.sort.bam ; do samtools index $BAM & wait; done
   for BAM in *.sort.bam ; do samtools flagstat $BAM > ${BAM}.stats & wait; done
   for BAM in *.sort.bam; do samtools view -q30 -bh -F0x4 $BAM > $BAM.MQ30 & wait; done
-  for BAM in *.sort.bam.MQ30; do samtools flagstat $BAM > ${BAM}stats & wait; done
+  for BAM in *.sort.bam.MQ30; do samtools flagstat $BAM > ${BAM}.stats & wait; done
   for BAM in *sort.bam; do samtools view -q30 -bh -F0x4 $BAM | bedtools intersect -a /dev/stdin -b $BED -v > $BAM.MQ30.mask & wait; done
