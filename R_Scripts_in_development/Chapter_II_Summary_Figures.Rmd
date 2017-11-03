@@ -1,14 +1,14 @@
 ---
-title: 'Chapter II: Assembly methods for Microbial Genome Reconstruction from Ancient
+title: 'Chapter II: Methods for Microbial Genome Reconstruction from Ancient
   DNA'
 author: "Luis A. Arriola"
 date: "October 2017"
 output:
-  word_document: default
   pdf_document:
     pandoc_args:
     - -V
     - classoption=twocolumn
+  word_document: default
   html_document: default
 ---
 <!-- #START_OF_COMMENT_CHUNK-->
@@ -20,7 +20,7 @@ Technological and analytical advances in the last decade revolutionized the stud
 
 Here we present a comparative assessment of methods for reconstruction of whole genomic sequences using simulated data mirroring conditions commonly found in ancient metagenomic datasets (contamination, damage, and divergence). 
 
-Then, we use information about strengths and weaknesses of this tools to guide the reconstruction of the oldest ancient microbial genome draft (*Methanobrevibacter oralis* subsp. neandertalensis), providing _% more information with _% fewer errors.
+Then, we use information about strengths and weaknesses of this tools to guide the reconstruction of the oldest ancient microbial genome draft (*Methanobrevibacter oralis* subsp. neandertalensis), providing \_ % more information with \_% fewer errors.
 
 # INTRODUCTION
 
@@ -30,13 +30,14 @@ The reconstruction of a genomic sequence is a critical step in the study of an o
 
 In addition to reference-based mapping and de novo assembly, other methods have been developed to assemble small genomes. These include reference guided assembly, which makes use of the advantages of de novo assembly to reconstruct contigs that could contain highly variable regions, and a known reference sequence as a scaffold to locate the most likely positions for these contigs (Rajaraman *et al.*, 2013). Another novel method is iterative mapping. This method uses an initial mapping or de novo step to create self-standing reference sequences that will be cyclically extended via a reference mapping approach until no more new reads can be added (REF). This method has been used successfully to reconstruct mitochondrial sequences, with the advantage of not having to rely on a full genomic reference sequence and be able to work on complex datasets (metagenomics) (Hahn *et al.*, 2013; Westbury *et al.*, 2017).
 
-Reconstructing microbial genomes presents certain advantages, as they count with small haploid genomes, which allow for reduced mapping/assembly times compared to higher organisms; however, some disadvantages also need to be considered. Ancient bacterial genome reconstruction represents a challenge due to lower yields of coverage derived from post-mortem damage. Other complications include genetic heterogeneity, a higher genetic divergence from modern organisms, lateral gene transfer, lower presence in samples and contamination. Many different strategies have been used in palaeomicrobiology studies to reconstruct whole genome information (**Table 1**). Nevertheless, to our knowledge, no formal comparison of different genome reconstruction approaches has been conducted, nor has the impact of post-mortem aDNA damage on the reconstruction of genomes from microorganisms been investigated. Therefore it is essential to explore how different conditions found on aDNA, such as short read sizes, DNA damage, and genomic divergence, and contaminant reads affect the mappability of aDNA reads and the reconstruction of microbial genomes. In this study, we compare three different approaches for whole-genome reconstruction of microbial genomes on simulated datasets showing ancient DNA damage profiles and contaminant sequences. We identified biases presented by each approach and propose possible ways to avoid them. Finally, we apply these approaches to real data to provide X% better genome coverage of Methanobrevibacter oralis neandertalensis, the oldest microbial ancient genome reported to date, reconstructed using conventional methods for the field.
+Reconstructing microbial genomes presents certain advantages, as they count with small haploid genomes, which allow for reduced mapping/assembly times compared to higher organisms; however, some disadvantages also need to be considered. Ancient bacterial genome reconstruction represents a challenge due to lower yields of coverage derived from post-mortem damage. Other complications include genetic heterogeneity, a higher genetic divergence from modern organisms, lateral gene transfer, lower presence in samples and contamination. Many different strategies have been used in palaeomicrobiology studies to reconstruct whole genome information (**Table 01**). Nevertheless, to our knowledge, no formal comparison of different genome reconstruction approaches has been conducted, nor has the impact of post-mortem aDNA damage on the reconstruction of genomes from microorganisms been investigated. Therefore it is essential to explore how different conditions found on aDNA, such as short read sizes, DNA damage, and genomic divergence, and contaminant reads affect the mappability of aDNA reads and the reconstruction of microbial genomes. In this study, we compare three different approaches for whole-genome reconstruction of microbial genomes on simulated datasets showing ancient DNA damage profiles and contaminant sequences. We identified biases presented by each approach and propose possible ways to avoid them. Finally, we apply these approaches to real data to provide X% better genome coverage of Methanobrevibacter oralis neandertalensis, the oldest microbial ancient genome reported to date, reconstructed using conventional methods for the field.
 
 <!-- -->
+---
 |Study/Date	|Organism	|Genome Reconstruction Approach	|Platform|
 |------|---------|--------------------------|---|
 |Bos et al., 2011	|Yersinia pestis	|BWA default parameters	|Illumina|
-|Wagner et al., 2014	|Yersinia pestis	|BWA -n 0.15 -o 2||	
+|Wagner et al., 2014	|Yersinia pestis	|BWA -n 0.15 -o 2|*Illumina?*|	
 |Rasmussen et al., 2015b	|Yersinia pestis	|BWA mem first and then BWA aln disabled seed	|Illumina|
 |Bos et al., 2016	|Yersinia pestis	|BWA -n 0.1; BWA -n 0.15 -o 2 (Wagner); BWA mem|	Illumina|
 |Feldman et al., 2016	|Yersinia pestis	|BWA -n 0.1	|Illumina
@@ -51,7 +52,7 @@ Reconstructing microbial genomes presents certain advantages, as they count with
 |Weyrich et al., 2017	|Methanobrevibacter oralis subsp. neandertalensis	|BWA -l 1024 -n 0.01 -o 1 (no seed, one gap opening, relaxed edit distance)	|Illumina|
 <!-- -->
 
-> Table 01. Whole-genome reconstruction approaches used in palaeomicrobiology.
+> **Table 01**. Whole-genome reconstruction approaches used in palaeomicrobiology.
 
 ---
 
@@ -112,6 +113,23 @@ df_quast$Num.mismatches=as.numeric(levels(df_quast$Num.mismatches))[df_quast$Num
 
 
 library(ggplot2)
+```
+
+---
+
+## TARGET GENOME RECONSTRUCTIONS
+### Alignment coverage/Genome fraction recovered
+We define *genome fraction recovered* as the percentage of the genomic sequence of the target genome covered by the alignment of consensus contigs. **Figure #** compares the alignment coverage of the five target genomes with the different tools and conditions.
+
+```{r Genome Fraction Percentage , echo=FALSE, warning=FALSE, eval=TRUE }
+# Genome Fraction Percentage vs Total Number of Mismatches
+ggplot(aes(x=Divergence, y=Genome.fraction..Percent.),data=df_quast)+
+  geom_col(aes(fill=Tool,alpha=Deamination), position = position_dodge()) +
+  #coord_flip() +
+  facet_grid(Contamination~Method)+
+  ggtitle('Genome Fraction Covered (%)') +
+  theme(axis.text.x = element_text(angle=90, hjust = 0), legend.position = "bottom")
+
 ```
 
 ---
