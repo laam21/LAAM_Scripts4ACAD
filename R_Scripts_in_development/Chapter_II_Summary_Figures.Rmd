@@ -4,12 +4,12 @@ title: 'Chapter II: Methods for Microbial Genome Reconstruction from Ancient
 author: "Luis A. Arriola"
 date: "October 2017"
 output:
+  word_document: default
+  html_document: default
   pdf_document:
     pandoc_args:
     - -V
     - classoption=twocolumn
-  word_document: default
-  html_document: default
 ---
 <!-- #START_OF_COMMENT_CHUNK-->
 # Working Title: Comparative assessment of methods for reconstruction of whole genomic sequences from ancient microbial organisms
@@ -20,7 +20,9 @@ Technological and analytical advances in the last decade revolutionized the stud
 
 Here we present a comparative assessment of methods for reconstruction of whole genomic sequences using simulated data mirroring conditions commonly found in ancient metagenomic datasets (contamination, damage, and divergence). 
 
-Then, we use information about strengths and weaknesses of this tools to guide the reconstruction of the oldest ancient microbial genome draft (*Methanobrevibacter oralis* subsp. neandertalensis), providing \_ % more information with \_% fewer errors.
+We use information from this comparative assessment to guide the reconstruction of *Methanobrevibacter oralis*, the oldest ancient microbial genome draft reported, providing _% more information with _% fewer errors.
+
+Iterative mapping approaches provide the means to study the evolution of ancient microbial organisms using ancient DNA as they allow to recover highly variable genomic sequences inaccessible through commonly used reference mapping methods.
 
 # INTRODUCTION
 
@@ -30,10 +32,11 @@ The reconstruction of a genomic sequence is a critical step in the study of an o
 
 In addition to reference-based mapping and de novo assembly, other methods have been developed to assemble small genomes. These include reference guided assembly, which makes use of the advantages of de novo assembly to reconstruct contigs that could contain highly variable regions, and a known reference sequence as a scaffold to locate the most likely positions for these contigs (Rajaraman *et al.*, 2013). Another novel method is iterative mapping. This method uses an initial mapping or de novo step to create self-standing reference sequences that will be cyclically extended via a reference mapping approach until no more new reads can be added (REF). This method has been used successfully to reconstruct mitochondrial sequences, with the advantage of not having to rely on a full genomic reference sequence and be able to work on complex datasets (metagenomics) (Hahn *et al.*, 2013; Westbury *et al.*, 2017).
 
-Reconstructing microbial genomes presents certain advantages, as they count with small haploid genomes, which allow for reduced mapping/assembly times compared to higher organisms; however, some disadvantages also need to be considered. Ancient bacterial genome reconstruction represents a challenge due to lower yields of coverage derived from post-mortem damage. Other complications include genetic heterogeneity, a higher genetic divergence from modern organisms, lateral gene transfer, lower presence in samples and contamination. Many different strategies have been used in palaeomicrobiology studies to reconstruct whole genome information (**Table 01**). Nevertheless, to our knowledge, no formal comparison of different genome reconstruction approaches has been conducted, nor has the impact of post-mortem aDNA damage on the reconstruction of genomes from microorganisms been investigated. Therefore it is essential to explore how different conditions found on aDNA, such as short read sizes, DNA damage, and genomic divergence, and contaminant reads affect the mappability of aDNA reads and the reconstruction of microbial genomes. In this study, we compare three different approaches for whole-genome reconstruction of microbial genomes on simulated datasets showing ancient DNA damage profiles and contaminant sequences. We identified biases presented by each approach and propose possible ways to avoid them. Finally, we apply these approaches to real data to provide X% better genome coverage of Methanobrevibacter oralis neandertalensis, the oldest microbial ancient genome reported to date, reconstructed using conventional methods for the field.
+Reconstructing microbial genomes presents certain advantages, as they count with small haploid genomes, which allow for reduced mapping/assembly times compared to higher organisms; however, some disadvantages also need to be considered. Ancient bacterial genome reconstruction represents a challenge due to lower yields of coverage derived from post-mortem damage. Other complications include genetic heterogeneity, a higher genetic divergence from modern organisms, lateral gene transfer, lower presence in samples and contamination. Many different strategies have been used in palaeomicrobiology studies to reconstruct whole genome information (**Table 01**). Nevertheless, to our knowledge, no formal comparison of different genome reconstruction approaches has been conducted, nor has the impact of post-mortem aDNA damage on the reconstruction of genomes from microorganisms been investigated. Therefore it is essential to explore how different conditions found on aDNA, such as short read sizes, DNA damage, and genomic divergence, and contaminant reads affect the mappability of aDNA reads and the reconstruction of microbial genomes.<!-- In this study, we compare three different approaches for whole-genome reconstruction of microbial genomes on simulated datasets showing ancient DNA damage profiles and contaminant sequences. We identified biases presented by each approach and propose possible ways to avoid them. Finally, we apply these approaches to real data to provide X% better genome coverage of Methanobrevibacter oralis neandertalensis, the oldest microbial ancient genome reported to date, reconstructed using conventional methods for the field. -->
 
 <!-- -->
 ---
+
 |Study/Date	|Organism	|Genome Reconstruction Approach	|Platform|
 |------|---------|--------------------------|---|
 |Bos et al., 2011	|Yersinia pestis	|BWA default parameters	|Illumina|
@@ -61,9 +64,9 @@ Reconstructing microbial genomes presents certain advantages, as they count with
 
 #RESULTS
 
-In this study, we compared three different approaches for reconstructing microbial genomes from ancient DNA and explored how they are affected by characteristics commonly found in ancient metagenomic datasets. We used the genomic reference sequence of Streptococcus mutans UA159 and simulated insertions, deletions, and substitutions on it at five increasing levels to generate five target genomes with variable divergence levels. We included each target genome in three different contexts of contamination (No-Contamination (**0C100E**); Inter-species Contamination (**90C10E**); Intra-genera Contamination (**80Smu20E**)), and simulated reads with ancient damage profiles at three levels of deamination (0.1, 0.3, 0.5), for a total of 45 read pools. Then, we used reference mapping, reference assisted de novo assembly, and iterative mapping approaches to reconstruct the original target genomes from each pool. 
+In this study, we compared three different approaches for reconstructing microbial genomes from ancient DNA and explored how they are affected by characteristics commonly found in ancient metagenomic datasets. We used the genomic reference sequence of Streptococcus mutans UA159 and simulated insertions, deletions, and substitutions on it at five increasing levels to generate five target genomes with variable divergence levels. We included each target genome in three different contexts of contamination (No-Contamination (**0C100E**); Inter-species Contamination (**90C10E**); Intra-genera Contamination (**80Smu20E**)), and simulated reads with ancient damage profiles at three levels of deamination (0.1, 0.3, 0.5), for a total of 45 read pools. Then, we used *reference mapping*, *reference-guided de novo assembly*, and *iterative mapping* approaches to reconstruct the original target genomes from each pool. 
 
-In the reference mapping approach, we used the original genomic sequence of *S. mutans* UA159 as a reference and mapped reads with  *MIRA* (using default parameters specific for Illumina reads) and the programs *Bowtie2* and *BWA* (using three different sets of parameters, including parameters optimized for aDNA). In the reference assisted assembly, we generated contigs *de novo* using Velvet (v.1.2.10) through VelvetOptimiser (v2.2.5) and mapped the resulting contigs to the reference with the previously mentioned mappers and set of parameters. Finally, in the iterative mapping approach, we used MITObim with mapping and *de novo* initial steps, and different values for allowed mismatches. The resulting bam alignments were filtered by mapping quality (MQ>=30), and consensus files were called using samtools (v.1.3.1)/bcftools (v.1.3.1). For MIRA and MITObim, we used the final ungapped *FASTA* consensus sequence generated by these programs. We took the final consensus sequences of each approach and divided them into "consensus contigs" wherever we found more than five consecutive uncalled bases (N's). Finally, we aligned the "consensus contigs" of each approach to their original target genomes and evaluated the resulting reconstructions using the QUalitative Assessment Tool (QUAST).
+In the reference mapping approach, we used the original genomic sequence of *S. mutans* UA159 as a reference and mapped reads with  *MIRA* (using default parameters specific for Illumina reads) and the programs *Bowtie2* and *BWA* (using three different sets of parameters, including parameters optimized for aDNA). In the reference assisted assembly, we generated contigs *de novo* using *Velvet* (v.1.2.10) through *VelvetOptimiser* (v2.2.5) and mapped the resulting contigs to the reference with the previously mentioned mappers and set of parameters. Finally, in the iterative mapping approach, we used MITObim with mapping and *de novo* initial steps, and different values for allowed mismatches. The resulting bam alignments were filtered by mapping quality (MQ>=30), and consensus files were called using *samtools* (v.1.3.1)/*bcftools* (v.1.3.1). For *MIRA* and *MITObim*, we used the final ungapped *FASTA* consensus sequence generated by these programs. The final consensus sequences of each approach were divided into "consensus contigs" wherever more than five consecutive uncalled bases (N's) were found. Finally, we aligned the "consensus contigs" of each approach to their original target genomes and evaluated the resulting reconstructions using the QUalitative Assessment Tool (QUAST).
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -110,31 +113,84 @@ df_quast$Num.indels.per.100.kbp=as.numeric(levels(df_quast$Num.indels.per.100.kb
 df_quast$Num.indels=as.numeric(levels(df_quast$Num.indels))[df_quast$Num.indels]
 df_quast$Misassembled.contigs.length=as.numeric(levels(df_quast$Misassembled.contigs.length))[df_quast$Misassembled.contigs.length]
 df_quast$Num.mismatches=as.numeric(levels(df_quast$Num.mismatches))[df_quast$Num.mismatches]
-
+#df_quast$Unaligned.length=as.numeric(levels(df_quast$Unaligned.length))[df_quast$Unaligned.length]
+df_quast$Total.length..GreaterOrEqual.0.bp.=as.numeric(levels(df_quast$Total.length..GreaterOrEqual.0.bp.))[df_quast$Total.length..GreaterOrEqual.0.bp.]
 
 library(ggplot2)
 ```
 
 ---
 
-## TARGET GENOME RECONSTRUCTIONS
-### Alignment coverage/Genome fraction recovered
-We define *genome fraction recovered* as the percentage of the genomic sequence of the target genome covered by the alignment of consensus contigs. **Figure #** compares the alignment coverage of the five target genomes with the different tools and conditions.
+### Genome fraction recovered (Alignment coverage)
+We define *genome fraction recovered* as the percentage of the target genome covered by the alignment of *consensus contigs*.  For all reconstruction methods, the *genome fraction recovered* decreased with the increase in divergence between the reference sequence used and target genome. *Iterative mapping* approaches consistently recovered the largest amount of original genomic sequence, with the ones including an initial mapping step recovering more than 60% of the target genome, even at the highest level of divergence.
+Not surprisingly, the presence of non-endogenous reads affected the *reference guided assembly* approaches the most, in many cases halving the amount of genome fraction recovered by these tools. <!--In addition, pproaches based in *BWA aln*, which are specialized in shorter fragments, were particularly inefficient in mapping longer sequences (contigs) to a reference, consistent with previous observations (*REF: Heng li preprint 2013; Parks and Lambert, 2014*). -->*Reference mapping* and *iterative mapping* approaches were only slightly affected by contaminants reads, with *iterative mapping* approaches being the most affected by non-endogenous reads from closely related species reducing the genome fraction recovered by these approaches more than 5%.
+<!-- Increases in deamination had a small impact on *reference mapping* approaches, consistent with earlier findings (REFs). -->
+---
 
 ```{r Genome Fraction Percentage , echo=FALSE, warning=FALSE, eval=TRUE }
 # Genome Fraction Percentage vs Total Number of Mismatches
 ggplot(aes(x=Divergence, y=Genome.fraction..Percent.),data=df_quast)+
   geom_col(aes(fill=Tool,alpha=Deamination), position = position_dodge()) +
+  #geom_col(data=df_quast, aes(x=Divergence, y=(Unaligned.length/Total.length..GreaterOrEqual.0.bp.), fill=Tool,alpha=Deamination), position = position_dodge())+
   #coord_flip() +
+  scale_alpha_discrete(range = c(0.5,0.9)) +
   facet_grid(Contamination~Method)+
-  ggtitle('Genome Fraction Covered (%)') +
-  theme(axis.text.x = element_text(angle=90, hjust = 0), legend.position = "bottom")
+  ggtitle('Genome Fraction Recovered (%)') +
+  theme(axis.text.x = element_text(angle=90, hjust = 0), legend.position = "right")
 
 ```
+  
+  >**Figure #.-** Percentage of target genome covered by the alignment of consensus contigs generated by each method.
 
 ---
 
-# CONTAMINATION
+### Accuracy of reconstruction
+To evaluate the accuracy of the reconstruction, we compared the average number of mismatches and indels per 100 000 aligned bases that each approach introduced. *Reference mapping* approaches had the lowest values of average mismatches at lower values of divergence, but this values raised with the increase in divergence. *MIRA* mapper was the most affected by divergence increases (**Sup. Figure #**). Interestingly, in the *reference mapping approaches* the presence of non-endogenous reads and the number of deaminations accounted only for a small increase in average mismatches. *Bowtie2* with aDNA parameters was the best performer in all conditions, except for the dataset with highly similar genomes and high divergence. Although *reference guided assembly* and *iterative mapping* approaches had a higher average number of mismatches than *reference mapping* approaches, values of average mismatches raised with an increase in deamination levels, but remained almost constant across all divergence levels, and for *iterative mapping* decreased slightly. Not surprisingly, the presence of contaminating reads from closely related species accounted for a notable increase in average mismatches in *iterative mapping* approaches. The average number of indels per 100k bases aligned increased with divergence on the three approaches (**Sup. Figure #**); however, *reference mapping* and *reference guided* approaches had higher values than *iterative mapping* approaches, even at low levels of divergence. 
+
+```{r Suplementary Mismatches and Indels , echo=FALSE , warning=FALSE, eval=TRUE}
+ggplot(aes(x=Contamination,y=(Num.indels.per.100.kbp+Num.mismatches.per.100.kbp)),data=df_quast)+
+  geom_col(aes(fill=Tool, alpha=Deamination),position = position_dodge()) +
+  scale_alpha_discrete(range = c(0.5,0.9)) +
+  ##scale_y_continuous(expand= c(0,0))+
+  ##expand_limits(y = c(0,1.05 * max(df_quast$Num.indels.per.100.kbp)))+
+  scale_y_sqrt()+
+  facet_grid(Method~Divergence)+
+  ggtitle('A) Average number of Indels and Mismatches per 100k aligned bases') +
+  theme(axis.text.x = element_text(angle=90, hjust = 0), legend.position = "right")
+
+ggplot(aes(x=Contamination,y=Num.mismatches.per.100.kbp),data=df_quast)+
+  geom_col(aes(fill=Tool, alpha=Deamination),position = position_dodge()) +
+  scale_alpha_discrete(range = c(0.5,0.9)) +
+  #scale_y_continuous(limits = c(0,800))+
+  scale_y_sqrt()+
+  facet_grid(Method~Divergence  )+
+  ggtitle('B) Average number of mismatches per 100k aligned bases') +
+  theme(axis.text.x = element_text(angle=90, hjust = 0), legend.position = "right")
+
+ggplot(aes(x=Contamination,y=Num.indels.per.100.kbp),data=df_quast)+
+  geom_col(aes(fill=Tool, alpha=Deamination),position = position_dodge()) +
+  scale_alpha_discrete(range = c(0.5,0.9)) +
+  ##scale_y_continuous(expand= c(0,0))+
+  ##expand_limits(y = c(0,1.05 * max(df_quast$Num.indels.per.100.kbp)))+
+  scale_y_sqrt()+
+  facet_grid(Method~Divergence  )+
+  ggtitle('C) Average number of Indels per 100k aligned bases') +
+  theme(axis.text.x = element_text(angle=90, hjust = 0), legend.position = "right")
+
+```
+  >**Sup. Figure #.-** Average number of mismatches and indels per 100,000 aligned bases.
+
+
+
+```{r Accuracy vs Genome Coverage, echo= FALSE, warning=FALSE, eval=TRUE}
+
+ggplot(aes(x=Genome.fraction..Percent. ,y=(Num.mismatches.per.100.kbp  + Num.indels.per.100.kbp)),data=df_quast)+
+  geom_point(aes(color=Tool, shape=Method), size=2.5) +
+  facet_grid(Divergence~  Contamination +Deamination , scales = "free", margins = TRUE)+
+  ggtitle('Accuracy vs Genome Fraction Recovered ') +
+  theme(axis.text.x = element_text(angle=90, hjust = 0), legend.position = "bottom")
+
+```
 
 ## Mapping efficiency
 As a measurement of efficiency (*sensitivity*), we calculated the number of endogenous reads recovered by the Reference Mapping and Iterative Mapping approaches. **Figure #** shows the percentage of endogenous reads mapped with high confidence (MQ>=30) from the total endogenous reads available in each pool. We calculated this value as the proportion of mapped reads originated from the target genomes and with mapping quality equal or greater than 30, from the total number of simulated reads generated from that target genome. This measure allows us to compare how much 'real' information could be recovered with the different methods and tools at all levels of divergence, contamination, and deamination. The amount of endogenous information that the mapping approaches were able to recover is significantly affected by the divergence between the reference genome used, and the target genome reads. Notably, *MIRA* allows the recovery of most of the endogenous reads available and is the mapping approach that is less affected by divergence. From the other mappers analyzed, *BWA mem* is the second best approach, allowing the recovery of the highest number of reads on all the divergence levels, and recovering almost three times more endogenous reads than the next approach (*BWA aDNA*) in the highest level of divergence. The approaches based on *Bowtie2*  recovered the lowest amount of endogenous reads, with *Bowtie2 aDNA* being the worst performer. Notably, the deamination level does not appear to have a significant effect on the number of reads that the approaches based on *BWA* were able to map, but it does affect the *Bowtie2* approaches, with  *Bowtie2 aDNA* being the most affected by increases in cytosine deamination. Among the iterative approaches, the ones with an initial mapping step were able to recover a more considerable amount of endogenous reads, even at the highest level of divergence, and the levels of deamination did not seem to have a significant impact on them. However, as expected, the most restrictive iterative approach, which did not allow for mismatches at all(*MITObim0*), was the worst performer and was greatly affected by increasing levels of deamination. On the other hand, the ones including a *de novo* assembly step were able to recover only about 60% of all the endogenous reads available in the first four levels of divergence (similar to the approach *MITObim0*) and less than 25% in the highest level of divergence.
@@ -369,7 +425,7 @@ Using QUAST we aligned the resulting consensus contigs of each approach and eval
 * **Mismatches**: Number of mismatches in all alligned bases. 
 * **Mismatches per 100kbp**:Average number of indels per 100,000 alinged bases. True SNPs and sequencing errors are not distinguished and are counted equally.
 
-```{r mismatches , echo=FALSE}
+```{r mismatches , echo= FALSE, warning=FALSE, eval=FALSE}
 ggplot(aes(x=Divergence,y=Num.mismatches),data=df_quast)+
   geom_point(aes(color=Tool, shape=Contamination, alpha=Deamination), position = position_dodge(width = .5), size=2.5) +
   facet_grid(Contamination~  Method + Tool )+
@@ -399,7 +455,7 @@ ggplot(aes(x=Divergence,y=Num.mismatches.per.100.kbp),data=df_quast)+
 #### N's per 100k bases aligned
 Total number of uncalled bases (N's) in the assembly
 
-```{r  Ns, echo=FALSE}
+```{r  Ns, echo= FALSE, warning=FALSE, eval=FALSE}
 ggplot(aes(x=Divergence,y=Num.N.s.per.100.kbp),data=df_quast)+
   geom_point(aes(color=Tool, shape=Contamination, alpha=Deamination), position = position_dodge(width = .5), size=2.5) +
   facet_grid(Contamination~  Method + Tool )+
@@ -416,7 +472,7 @@ ggplot(aes(x=Divergence,y=Num.N.s.per.100.kbp),data=df_quast)+
 
 #### INDELS
 
-```{r indels, echo= FALSE}
+```{r indels, echo= FALSE, warning=FALSE, eval=FALSE}
 ggplot(aes(x=Divergence,y=Num.indels),data=df_quast)+
   geom_point(aes(color=Tool, shape=Contamination, alpha=Deamination), position = position_dodge(width = .5), size=2.5) +
   facet_grid(Contamination~  Method + Tool )+
@@ -435,7 +491,7 @@ ggplot(aes(x=Divergence,y=Num.indels.per.100.kbp),data=df_quast)+
 ##COMBINATIONS
 #### GENOME FRACTION PERCENTAGE vs MISMATCHES (Accuracy)
 
-```{r echo=FALSE}
+```{r Genome fraction vs Mismatches, echo= FALSE, warning=FALSE, eval=FALSE}
 # Genome Fraction Percentage vs Total Number of Mismatches
 ggplot(aes(x=Genome.fraction..Percent. , y=(Num.mismatches)),data=df_quast)+
   geom_point(aes(color=Tool, shape=Method), size=2.5) +
@@ -454,7 +510,7 @@ ggplot(aes(x=Genome.fraction..Percent. ,y=(Num.mismatches.per.100.kbp)),data=df_
 
 #### GENOME FRACTION PERCENTAGE vs INDELS 
 
-```{r echo=FALSE}
+```{r , echo= FALSE, warning=FALSE, eval=FALSE}
 # Genome Fraction Percentage vs Total Number of indels
 ggplot(aes(x=Genome.fraction..Percent. , y=(Num.indels)),data=df_quast)+
   geom_point(aes(color=Tool, shape=Method), size=2.5) +
@@ -473,7 +529,7 @@ ggplot(aes(x=Genome.fraction..Percent. ,y=(Num.indels.per.100.kbp)),data=df_quas
 
 #### GENOME FRACTION PERCENTAGE vs N's 
 
-```{r echo = FALSE}
+```{r , echo= FALSE, warning=FALSE, eval=FALSE}
 
 # Genome Fraction Percentage vs Average number of N's per 100kbp
 ggplot(aes(x=Genome.fraction..Percent. ,y=(Num.N.s.per.100.kbp)),data=df_quast)+
